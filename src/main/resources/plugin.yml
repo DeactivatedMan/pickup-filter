@@ -1,0 +1,14 @@
+name: Pickup Filter
+description: @description@
+version: '@version@'
+
+main: me.deac.pickupFilter.PickupFilter
+api-version: '1.21'
+load: POSTWORLD
+
+authors: [ DeactivatedMan ]
+website: https://buymeacoffee.com/deactivatedman
+
+commands:
+  filter:
+    description: "Main command for Pickup Filter plugin."
