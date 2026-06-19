@@ -43,7 +43,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             .append(
                     Component.text("\n - ").color(NamedTextColor.GRAY)
-                            .append(Component.text("switch 1-9")
+                            .append(Component.text("switch off-9")
                                     .color(NamedTextColor.DARK_PURPLE)
                                     .decoration(TextDecoration.UNDERLINED, true)
 
@@ -66,13 +66,16 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 // Explanation + commands
                 player.sendMessage(tellCommandsText);
             } else {
-                byte value = ConvertToByte(args[1]);
-                if (value == 0) {
+                byte value = ConvertToByte(args[1].replace("off", "0"));
+                if (value == 10) {
                     player.sendMessage(Component.text("PickupFilter > Profile index not found!").color(NamedTextColor.RED));
                 }
 
                 switch (args[0].toLowerCase()) {
-                    case "open" -> handleOpen(player, value);
+                    case "open" -> {
+                        if (value == 0) player.sendMessage(Component.text("PickupFilter > Cannot edit Off profile").color(NamedTextColor.RED));
+                        else handleOpen(player, value);
+                    }
                     case "switch" -> handleSwitch(player, value);
                 }
             }
@@ -99,9 +102,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     private void handleSwitch(Player player, byte index) {
-        // Switch to this profile
+        // Switch to the requested profile
         plugin.getDataManager().setIndex(player.getUniqueId(), index);
-        player.sendMessage(Component.text("PickupFIlter > Switched to profile "+index).color(NamedTextColor.DARK_GREEN));
+        player.sendMessage(Component.text(
+                index == 0 ? "PickupFilter > Switched to off state"
+                : "PickupFIlter > Switched to profile "+index
+        ).color(NamedTextColor.DARK_GREEN));
     }
 
     @Override
@@ -110,12 +116,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
         if (args.length == 1) {
             return StringUtil.copyPartialMatches(args[0], List.of("open", "switch"), completions);
-        } else return List.of("1", "2", "3", "4", "5", "6", "7", "8", "9");
+        } else return List.of("off", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     }
 
     private byte ConvertToByte(String input) {
-        if (input != null && input.matches("^[1-9]$")) {
+        if (input != null && input.matches("^[0-9]$")) {
             return Byte.parseByte(input);
-        } else return 0;
+        } else return 10;
     }
 }

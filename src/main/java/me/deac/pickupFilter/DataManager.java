@@ -96,10 +96,11 @@ public class DataManager {
         boolean hasEnchants = !enchants.isEmpty();*/
 
         YamlConfiguration config = getPlayerConfig(uuid);
-        List<?> rawList = config.getList("profile"+indexMap.getOrDefault(uuid, (byte) 0), null);
-        if (rawList == null) return false;
+        List<?> rawList = config.getList("profile"+getIndex(uuid), null);
+        if (rawList == null || rawList.isEmpty()) return false;
+        plugin.getLogger().info("rawList is this long: " + rawList.size());
         for (Object object : rawList) {
-            if (object instanceof ItemStack itemStack && itemStack.getType() != materialFilter) return true;
+            if (object instanceof ItemStack itemStack && itemStack.getType() == materialFilter) return true;
 
             /*if (
                     object instanceof ItemStack itemStack &&

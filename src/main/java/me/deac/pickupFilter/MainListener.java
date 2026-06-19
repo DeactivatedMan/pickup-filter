@@ -1,8 +1,5 @@
 package me.deac.pickupFilter;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,8 +30,12 @@ public class MainListener implements Listener {
 
         ItemStack itemStack = event.getItem().getItemStack();
         plugin.getLogger().info("They're holding " + itemStack.getType().name() + "!");
+        if (itemStack.getItemMeta() != null) plugin.getLogger().info("It has item meta!");
 
-        if (itemStack.getItemMeta() != null && !plugin.getDataManager().profileContains(player.getUniqueId(), itemStack)) event.setCancelled(true);
+        boolean wasd = plugin.getDataManager().profileContains(player.getUniqueId(), itemStack);
+        plugin.getLogger().info("The profile does"+(wasd ? "" : "n't")+" contain it!");
+
+        if (itemStack.getItemMeta() != null && !wasd) event.setCancelled(true);
     }
 
     @EventHandler
