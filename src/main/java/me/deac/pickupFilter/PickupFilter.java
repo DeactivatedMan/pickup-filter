@@ -1,18 +1,18 @@
 package me.deac.pickupFilter;
 
 import org.bukkit.command.PluginCommand;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public final class PickupFilter extends JavaPlugin {
+
+    private PFdataManager dataManager;
 
     @Override
     public void onEnable() {
         // Make folder
         if (!getDataFolder().exists()) getDataFolder().mkdirs();
+
+        dataManager = new PFdataManager(this);
 
         PluginCommand command = getCommand("filter");
         if (command != null) {
@@ -22,11 +22,7 @@ public final class PickupFilter extends JavaPlugin {
         }
     }
 
-    public List<ItemStack> getProfile(String uuid, byte slot) {
-        return new ArrayList<>();
-    }
-
-    public void setProfile(String uuid, byte slot, List<ItemStack> itemList) {
-        //
+    public PFdataManager getDataManager() {
+        return dataManager;
     }
 }
