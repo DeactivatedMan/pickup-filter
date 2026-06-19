@@ -32,23 +32,23 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             .append(
                 Component.text(" - ").color(NamedTextColor.GRAY)
-                    .append(Component.text("open 1-9")
+                    .append(Component.text("edit 1-9")
                         .color(NamedTextColor.DARK_PURPLE)
                         .decoration(TextDecoration.UNDERLINED, true)
 
-                        .clickEvent(ClickEvent.suggestCommand("/filter open "))
-                        .hoverEvent(HoverEvent.showText(Component.text("Run command")))
+                        .clickEvent(ClickEvent.suggestCommand("/filter edit "))
+                        .hoverEvent(HoverEvent.showText(Component.text("Opens the filter editor")))
                     )
             )
 
             .append(
                     Component.text("\n - ").color(NamedTextColor.GRAY)
-                            .append(Component.text("switch off-9")
+                            .append(Component.text("(switch) off-9")
                                     .color(NamedTextColor.DARK_PURPLE)
                                     .decoration(TextDecoration.UNDERLINED, true)
 
-                                    .clickEvent(ClickEvent.suggestCommand("/filter switch "))
-                                    .hoverEvent(HoverEvent.showText(Component.text("Run command")))
+                                    .clickEvent(ClickEvent.suggestCommand("/filter "))
+                                    .hoverEvent(HoverEvent.showText(Component.text("Switches to selected filter profile (or disables)")))
                             )
             )
             .append(
@@ -62,19 +62,38 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if ( sender instanceof Player player ) {
             plugin.getDataManager().ensureDefaults(player.getUniqueId());
 
+            if (args.length < 1) player.sendMessage(tellCommandsText);
+            else {
+                String preConvert = args[args.length-1].replace("off", "0");
+                byte value = preConvert.matches("^[0-9]$") ? Byte.parseByte(preConvert) : 10;
+                if (value == 10) {
+                    player.sendMessage(Component.text("PickupFilter > Profile index not found!").color(NamedTextColor.RED));
+                    return true;
+                }
+
+                if (args.length == 1) handleSwitch(player, value);
+                if (args.length == 2) {
+                    switch (args[0].toLowerCase()) {
+                        case "edit" -> handleEdit(player, value);
+                        case "switch" -> handleSwitch(player, value);
+                    }
+                }
+            }
+
             if (args.length != 2) {
                 // Explanation + commands
                 player.sendMessage(tellCommandsText);
             } else {
-                byte value = ConvertToByte(args[1].replace("off", "0"));
+                String preConvert = args[1].replace("off", "0");
+                byte value = preConvert.matches("^[0-9]$") ? Byte.parseByte(preConvert) : 10;
                 if (value == 10) {
                     player.sendMessage(Component.text("PickupFilter > Profile index not found!").color(NamedTextColor.RED));
                 }
 
                 switch (args[0].toLowerCase()) {
-                    case "open" -> {
+                    case "edit" -> {
                         if (value == 0) player.sendMessage(Component.text("PickupFilter > Cannot edit Off profile").color(NamedTextColor.RED));
-                        else handleOpen(player, value);
+                        else handleEdit(player, value);
                     }
                     case "switch" -> handleSwitch(player, value);
                 }
@@ -83,7 +102,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    private void handleOpen(Player player, byte index) {
+    private void handleEdit(Player player, byte index) {
+        if (index == 0) player.sendMessage(Component.text("PickupFilter > Cannot edit Off profile").color(NamedTextColor.RED));
         // Open chest GUI for this profile
         FilterMenuHolder holder = new FilterMenuHolder();
 
@@ -113,15 +133,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
+        List<String> profiles = new ArrayList<>(List.of("off", "1", "2", "3", "4", "5", "6", "7", "8", "9"));
 
         if (args.length == 1) {
-            return StringUtil.copyPartialMatches(args[0], List.of("open", "switch"), completions);
-        } else return List.of("off", "1", "2", "3", "4", "5", "6", "7", "8", "9");
-    }
-
-    private byte ConvertToByte(String input) {
-        if (input != null && input.matches("^[0-9]$")) {
-            return Byte.parseByte(input);
-        } else return 10;
+            profiles.addAll(List.of("edit", "switch"));
+            return StringUtil.copyPartialMatches(args[0], profiles, completions);
+        } else return profiles;
     }
 }

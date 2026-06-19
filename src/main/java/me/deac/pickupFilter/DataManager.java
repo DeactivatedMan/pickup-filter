@@ -82,6 +82,8 @@ public class DataManager {
         savePlayerConfig(uuid, config);
     }
     public boolean profileContains(UUID uuid, ItemStack itemFilter) {
+        if (!indexMap.containsKey(uuid) || indexMap.get(uuid) == 0) return true; // If player is in "off" profile
+
         Material materialFilter = itemFilter.getType();
         /*ItemMeta metaFilter = itemFilter.getItemMeta();
         if (metaFilter == null) return false;
@@ -134,7 +136,8 @@ public class DataManager {
 
     //region Index Map
     public void setIndex(UUID uuid, byte index) {
-        indexMap.put(uuid, index);
+        if (index == 0) indexMap.remove(uuid);
+        else indexMap.put(uuid, index);
     }
     public byte getIndex(UUID uuid) {
         return indexMap.getOrDefault(uuid, (byte) 1);
