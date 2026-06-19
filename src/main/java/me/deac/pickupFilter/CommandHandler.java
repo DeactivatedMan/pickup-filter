@@ -32,11 +32,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             .append(
                 Component.text(" - ").color(NamedTextColor.GRAY)
-                    .append(Component.text("open")
+                    .append(Component.text("open 1-9")
                         .color(NamedTextColor.DARK_PURPLE)
                         .decoration(TextDecoration.UNDERLINED, true)
 
-                        .clickEvent(ClickEvent.suggestCommand("/filter open 1-9"))
+                        .clickEvent(ClickEvent.suggestCommand("/filter open"))
                         .hoverEvent(HoverEvent.showText(Component.text("Run command")))
                     )
             )
@@ -72,27 +72,36 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
 
                 switch (args[0].toLowerCase()) {
-                    case "open" -> HandleOpen(player, value);
-                    case "switch" -> HandleSwitch(player, value);
+                    case "open" -> handleOpen(player, value);
+                    case "switch" -> handleSwitch(player, value);
                 }
             }
         } else sender.sendMessage("Filter commands only executable by players!");
         return true;
     }
 
-    private void HandleOpen(Player player, byte index) {
+    private void handleOpen(Player player, byte index) {
         // Open chest GUI for this profile
-        List<ItemStack> stackList = plugin.getDataManager().getProfile(player.getUniqueId(), index);
-        Inventory inventory = Bukkit.createInventory(null, 27, Component.text("Profile "+index).decoration(TextDecoration.BOLD, true));
+        FilterMenuHolder holder = new FilterMenuHolder();
 
+        List<ItemStack> stackList = plugin.getDataManager().getProfile(player.getUniqueId(), index);
+        Inventory inventory = Bukkit.createInventory(
+                holder, 27,
+                Component.text("Profile "+index)
+                        .decoration(TextDecoration.BOLD, true)
+        );
         inventory.setContents( stackList.toArray(new ItemStack[0]) );
+
+        holder.setInventory(inventory);
+        holder.index = index;
 
         player.openInventory(inventory);
     }
 
-    private void HandleSwitch(Player player, byte index) {
+    private void handleSwitch(Player player, byte index) {
         // Switch to this profile
         plugin.getDataManager().setIndex(player.getUniqueId(), index);
+        player.sendMessage(Component.text("PickupFIlter > Switched to profile "+index).color(NamedTextColor.DARK_GREEN));
     }
 
     @Override

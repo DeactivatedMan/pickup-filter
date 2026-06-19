@@ -20,6 +20,9 @@ public final class PickupFilter extends JavaPlugin {
             command.setExecutor(cmdHandler);
             command.setTabCompleter(cmdHandler);
         }
+
+        MainListener listener = new MainListener(this);
+        getServer().getPluginManager().registerEvents(listener, this);
     }
 
     public DataManager getDataManager() {

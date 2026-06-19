@@ -1,1 +1,1 @@
-rootProject.name = "Pickup Filter"
+rootProject.name = "pickup-filter"
