@@ -1,5 +1,6 @@
 package me.deac.pickupFilter;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,14 +25,9 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onItemPickup(EntityPickupItemEvent event) {
-        //plugin.getLogger().info("Pickup event!");
         if ( !(event.getEntity() instanceof Player player) ) return;
-        //plugin.getLogger().info("It's a player!");
 
         ItemStack itemStack = event.getItem().getItemStack();
-        //plugin.getLogger().info("They're holding " + itemStack.getType().name() + "!");
-        //if (itemStack.getItemMeta() != null) plugin.getLogger().info("It has item meta!");
-        //plugin.getLogger().info("The profile does"+(wasd ? "" : "n't")+" contain it!");
 
         if (itemStack.getItemMeta() != null && !plugin.getDataManager().profileContains(player.getUniqueId(), itemStack)) event.setCancelled(true);
     }
@@ -40,18 +36,6 @@ public class MainListener implements Listener {
     public void onPlayerLeave(PlayerQuitEvent event) {
         plugin.getDataManager().removeIndex(event.getPlayer().getUniqueId());
     }
-
-    /*@EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        Component title = event.getView().title();
-        String titleText = PlainTextComponentSerializer.plainText().serialize(title);
-        if (!title.hasDecoration(TextDecoration.BOLD) || !titleText.startsWith("Profile ") || titleText.length() != 9) return; // If title isnt bolded or doesnt start with "Profile"
-
-        char lastChar = titleText.charAt(titleText.length()-1);
-        byte profileIndex = (byte) ( Character.isDigit(lastChar) ? Character.getNumericValue(lastChar) : 0 );
-
-        //plugin.getLogger().info("Clicked inventory on profile " + profileIndex);
-    }*/
 
     //region Filter Inventory
     @EventHandler
@@ -63,14 +47,39 @@ public class MainListener implements Listener {
         ItemStack clickedItem = event.getCurrentItem();
         //ItemStack cursorItem = event.getCursor();
 
+        UUID uuid = event.getWhoClicked().getUniqueId();
+
+        if (holder.index == 0) {
+            if (clickedItem == null) return;
+            switch (clickedItem.getType()) {
+                case Material.RED_STAINED_GLASS_PANE -> {
+                    plugin.getLogger().info("Red pane");
+                    // Enable this index
+                    topInventory.setItem(event.getSlot(), plugin.greenPane);
+                    int prevIndex = plugin.getDataManager().getIndex(uuid)-1;
+                    if (prevIndex != -1) topInventory.setItem(prevIndex, plugin.redPane);
+
+                    Bukkit.dispatchCommand(event.getWhoClicked(), "filter "+ (event.getSlot()+1) );
+                }
+                case Material.LIME_STAINED_GLASS_PANE -> {
+                    plugin.getLogger().info("Green pane");
+                    // Disable this index
+                    plugin.getDataManager().removeIndex(uuid);
+                    topInventory.setItem(event.getSlot(), plugin.redPane);
+
+                } case Material.HOPPER -> Bukkit.dispatchCommand(event.getWhoClicked(), "filter edit "+ (event.getSlot()-8) );
+            }
+
+        }
+
         // Player clicked in filter inventory
-        if (
+        else if (
                 event.getClickedInventory() == topInventory
                 && clickedItem != null &&
                 clickedItem.getType() != Material.AIR
         ) {
             event.setCurrentItem(null);
-            updateProfile(event.getWhoClicked().getUniqueId(), holder.index, topInventory);
+            updateProfile(uuid, holder.index, topInventory);
         }
 
         // Player clicked in own inventory
@@ -80,7 +89,7 @@ public class MainListener implements Listener {
                 clickedItem.getType() != Material.AIR
         ) {
             addItemClone(topInventory, clickedItem);
-            updateProfile(event.getWhoClicked().getUniqueId(), holder.index, topInventory);
+            updateProfile(uuid, holder.index, topInventory);
         }
     }
 
@@ -90,6 +99,7 @@ public class MainListener implements Listener {
 
         // Cancel default dragging mechanics
         event.setCancelled(true);
+        if (holder.index == 0) return;
 
         Inventory topInventory = event.getView().getTopInventory();
         ItemStack draggedItem = event.getOldCursor();
