@@ -98,7 +98,7 @@ public class DataManager {
         YamlConfiguration config = getPlayerConfig(uuid);
         List<?> rawList = config.getList("profile"+getIndex(uuid), null);
         if (rawList == null || rawList.isEmpty()) return false;
-        plugin.getLogger().info("rawList is this long: " + rawList.size());
+        //plugin.getLogger().info("rawList is this long: " + rawList.size());
         for (Object object : rawList) {
             if (object instanceof ItemStack itemStack && itemStack.getType() == materialFilter) return true;
 

@@ -24,18 +24,16 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onItemPickup(EntityPickupItemEvent event) {
-        plugin.getLogger().info("Pickup event!");
+        //plugin.getLogger().info("Pickup event!");
         if ( !(event.getEntity() instanceof Player player) ) return;
-        plugin.getLogger().info("It's a player!");
+        //plugin.getLogger().info("It's a player!");
 
         ItemStack itemStack = event.getItem().getItemStack();
-        plugin.getLogger().info("They're holding " + itemStack.getType().name() + "!");
-        if (itemStack.getItemMeta() != null) plugin.getLogger().info("It has item meta!");
+        //plugin.getLogger().info("They're holding " + itemStack.getType().name() + "!");
+        //if (itemStack.getItemMeta() != null) plugin.getLogger().info("It has item meta!");
+        //plugin.getLogger().info("The profile does"+(wasd ? "" : "n't")+" contain it!");
 
-        boolean wasd = plugin.getDataManager().profileContains(player.getUniqueId(), itemStack);
-        plugin.getLogger().info("The profile does"+(wasd ? "" : "n't")+" contain it!");
-
-        if (itemStack.getItemMeta() != null && !wasd) event.setCancelled(true);
+        if (itemStack.getItemMeta() != null && !plugin.getDataManager().profileContains(player.getUniqueId(), itemStack)) event.setCancelled(true);
     }
 
     @EventHandler
@@ -52,7 +50,7 @@ public class MainListener implements Listener {
         char lastChar = titleText.charAt(titleText.length()-1);
         byte profileIndex = (byte) ( Character.isDigit(lastChar) ? Character.getNumericValue(lastChar) : 0 );
 
-        plugin.getLogger().info("Clicked inventory on profile " + profileIndex);
+        //plugin.getLogger().info("Clicked inventory on profile " + profileIndex);
     }*/
 
     //region Filter Inventory

@@ -36,7 +36,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         .color(NamedTextColor.DARK_PURPLE)
                         .decoration(TextDecoration.UNDERLINED, true)
 
-                        .clickEvent(ClickEvent.suggestCommand("/filter open"))
+                        .clickEvent(ClickEvent.suggestCommand("/filter open "))
                         .hoverEvent(HoverEvent.showText(Component.text("Run command")))
                     )
             )
