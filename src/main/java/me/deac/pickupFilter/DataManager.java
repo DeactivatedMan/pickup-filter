@@ -2,6 +2,7 @@ package me.deac.pickupFilter;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
@@ -64,7 +65,7 @@ public class DataManager {
         if (changed) savePlayerConfig(uuid, config);
     }
 
-    public List<ItemStack> getProfle(UUID uuid, byte index) {
+    public List<ItemStack> getProfile(UUID uuid, byte index) {
         YamlConfiguration config = getPlayerConfig(uuid);
         List<?> rawList = config.getList("profile"+index, new ArrayList<>());
 
@@ -79,6 +80,55 @@ public class DataManager {
         YamlConfiguration config = getPlayerConfig(uuid);
         config.set("profile"+index, stackList);
         savePlayerConfig(uuid, config);
+    }
+    public boolean profileContains(UUID uuid, ItemStack itemFilter) {
+        Material materialFilter = itemFilter.getType();
+        /*ItemMeta metaFilter = itemFilter.getItemMeta();
+        if (metaFilter == null) return false;
+
+        Component displayName = metaFilter.hasDisplayName() ? metaFilter.displayName() : null;
+        boolean hasName = displayName!=null;
+
+        List<Component> lore = metaFilter.lore();
+        boolean hasLore = lore!=null && !lore.isEmpty();
+
+        Map<Enchantment, Integer> enchants = metaFilter.getEnchants();
+        boolean hasEnchants = !enchants.isEmpty();*/
+
+        YamlConfiguration config = getPlayerConfig(uuid);
+        List<?> rawList = config.getList("profile"+indexMap.getOrDefault(uuid, (byte) 0), null);
+        if (rawList == null) return false;
+        for (Object object : rawList) {
+            if (object instanceof ItemStack itemStack && itemStack.getType() != materialFilter) return true;
+
+            /*if (
+                    object instanceof ItemStack itemStack &&
+                            itemStack.getType() != materialFilter // First basic filter
+            ) {
+                // Do filter stuff
+                ItemMeta meta = itemStack.getItemMeta();
+                if (meta != null) {
+                    if ( hasName && meta.hasDisplayName() &&
+                            Objects.equals(displayName, meta.displayName())
+                    ) return true; // Display name is the same
+
+                    else if ( hasLore && meta.hasLore() &&
+                            Objects.equals(lore, meta.lore())
+                    ) return true; // Lore is the same
+
+                    else if ( hasEnchants && meta.hasEnchants() ) {
+                        int shared = 0;
+
+                        for (Enchantment enchant : enchants.keySet()) {
+                            if (meta.hasEnchant(enchant)) shared++;
+                            if (shared >= 2) return true; // Has two or more of same enchantment
+                        }
+                    }
+                }
+            }*/
+        }
+
+        return false;
     }
 
     //region Index Map

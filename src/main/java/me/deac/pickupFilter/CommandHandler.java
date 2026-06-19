@@ -60,6 +60,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String alias, String[] args) {
         if ( sender instanceof Player player ) {
+            plugin.getDataManager().ensureDefaults(player.getUniqueId());
+
             if (args.length != 2) {
                 // Explanation + commands
                 player.sendMessage(tellCommandsText);
@@ -80,7 +82,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     private void HandleOpen(Player player, byte index) {
         // Open chest GUI for this profile
-        List<ItemStack> stackList = plugin.getDataManager().getProfle(player.getUniqueId(), index);
+        List<ItemStack> stackList = plugin.getDataManager().getProfile(player.getUniqueId(), index);
         Inventory inventory = Bukkit.createInventory(null, 27, Component.text("Profile "+index).decoration(TextDecoration.BOLD, true));
 
         inventory.setContents( stackList.toArray(new ItemStack[0]) );
