@@ -1,4 +1,4 @@
 package me.deac.pickupFilter;
 
-public class PFlistener {
+public class MainListener {
 }

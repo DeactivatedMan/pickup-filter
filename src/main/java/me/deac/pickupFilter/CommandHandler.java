@@ -5,22 +5,25 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.StringUtil;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PFcmd implements CommandExecutor, TabCompleter {
+public class CommandHandler implements CommandExecutor, TabCompleter {
     private final PickupFilter plugin;
     private final Component tellCommandsText;
 
-    public PFcmd(PickupFilter plugin) {
+    public CommandHandler(PickupFilter plugin) {
         this.plugin = plugin;
 
         tellCommandsText = Component.text("Commands:\n")
@@ -67,20 +70,27 @@ public class PFcmd implements CommandExecutor, TabCompleter {
                 }
 
                 switch (args[0].toLowerCase()) {
-                    case "open" -> HandleOpen(player);
-                    case "switch" -> HandleSwitch(player);
+                    case "open" -> HandleOpen(player, value);
+                    case "switch" -> HandleSwitch(player, value);
                 }
             }
         } else sender.sendMessage("Filter commands only executable by players!");
         return true;
     }
 
-    private void HandleOpen(Player player) {
+    private void HandleOpen(Player player, byte index) {
         // Open chest GUI for this profile
+        List<ItemStack> stackList = plugin.getDataManager().getProfle(player.getUniqueId(), index);
+        Inventory inventory = Bukkit.createInventory(null, 27, Component.text("Profile "+index).decoration(TextDecoration.BOLD, true));
+
+        inventory.setContents( stackList.toArray(new ItemStack[0]) );
+
+        player.openInventory(inventory);
     }
 
-    private void HandleSwitch(Player player) {
+    private void HandleSwitch(Player player, byte index) {
         // Switch to this profile
+        plugin.getDataManager().setIndex(player.getUniqueId(), index);
     }
 
     @Override
