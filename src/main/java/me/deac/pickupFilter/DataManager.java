@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
 public class DataManager {
     private final PickupFilter plugin;
 
-    private Cache<UUID, YamlConfiguration> dataCache; // Used to minimise reads of files
-    private Map<UUID, Byte> indexMap = new HashMap<>();
+    private final Cache<UUID, YamlConfiguration> dataCache; // Used to minimise reads of files
+    private final Map<UUID, Byte> indexMap = new HashMap<>();
 
     public DataManager(PickupFilter plugin) {
         this.plugin = plugin;
