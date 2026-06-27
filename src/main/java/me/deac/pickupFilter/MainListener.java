@@ -59,7 +59,7 @@ public class MainListener implements Listener {
             if (clickedItem == null) return;
             switch (clickedItem.getType()) {
                 case Material.RED_STAINED_GLASS_PANE -> {
-                    plugin.getLogger().info("Red pane");
+                    //plugin.getLogger().info("Red pane");
                     // Enable this index
                     topInventory.setItem(event.getSlot(), plugin.greenPane);
                     int prevIndex = plugin.getDataManager().getIndex(uuid)-1;
@@ -68,7 +68,7 @@ public class MainListener implements Listener {
                     Bukkit.dispatchCommand(event.getWhoClicked(), "filter "+ (event.getSlot()+1) );
                 }
                 case Material.LIME_STAINED_GLASS_PANE -> {
-                    plugin.getLogger().info("Green pane");
+                    //plugin.getLogger().info("Green pane");
                     // Disable this index
                     plugin.getDataManager().removeIndex(uuid);
                     topInventory.setItem(event.getSlot(), plugin.redPane);
@@ -90,7 +90,7 @@ public class MainListener implements Listener {
                 String on = text.length == 2 ? (text[1].isEmpty() ? "" : text[1].substring(0, text[1].length()-1)) : "";
 
                 ItemMeta itemMeta = clickedItem.getItemMeta();
-                plugin.getLogger().info(name);
+                //plugin.getLogger().info(name);
                 itemMeta.displayName( Component.text(name + " - " + (Objects.equals(on, "ON") ? "OFF" : "ON") ).decoration(TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false) );
                 clickedItem.setItemMeta(itemMeta);
 

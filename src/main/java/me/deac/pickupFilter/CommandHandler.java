@@ -111,7 +111,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             List<Boolean> boolList = plugin.getDataManager().getProfileBools(uuid, index);// if (boolList.size() < 9) boolList.addAll( Collections.nCopies(9, false) );
             for (int i=0; i<9; i++) {
                 String category = PickupFilter.categoryFilters[i];
-                plugin.getLogger().info(category + " | " + boolList.get(i));
+                //plugin.getLogger().info(category + " | " + boolList.get(i));
                 String[] parts = category.split("-", 2); if (parts.length < 2) parts = List.of(category, "ERR").toArray(new String[2]);
 
                 ItemStack itemStack = new ItemStack(Material.FLINT);
@@ -135,10 +135,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         else {
             // Do custom main GUI
             byte selected = plugin.getDataManager().getIndex(uuid);
-            plugin.getLogger().info("Selected: " + selected);
+            //plugin.getLogger().info("Selected: " + selected);
             for (byte i=1; i < 10; i++) {
                 stackList.add(i==selected ? plugin.greenPane : plugin.redPane);
-                plugin.getLogger().info("Is selected: " + (i==selected) );
+                //plugin.getLogger().info("Is selected: " + (i==selected) );
             }
 
             for (byte i=1; i < 10; i++) {

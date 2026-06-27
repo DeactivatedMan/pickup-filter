@@ -57,8 +57,6 @@ public final class PickupFilter extends JavaPlugin {
     @Override
     public void onEnable() {
         // Make folder
-        getLogger().info( Material.DIAMOND_HELMET.name() );
-
         if (!getDataFolder().exists()) getDataFolder().mkdirs();
 
         dataManager = new DataManager(this);
