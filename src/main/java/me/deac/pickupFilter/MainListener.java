@@ -1,5 +1,8 @@
 package me.deac.pickupFilter;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -11,9 +14,12 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class MainListener implements Listener {
@@ -78,7 +84,21 @@ public class MainListener implements Listener {
                 && clickedItem != null &&
                 clickedItem.getType() != Material.AIR
         ) {
-            event.setCurrentItem(null);
+            if (event.getSlot() < 9) {
+                String[] text = PlainTextComponentSerializer.plainText().serialize(clickedItem.displayName()).split(" - ", 2);
+                String name = text[0].isEmpty() ? "" : text[0].substring(1);
+                String on = text.length == 2 ? (text[1].isEmpty() ? "" : text[1].substring(0, text[1].length()-1)) : "";
+
+                ItemMeta itemMeta = clickedItem.getItemMeta();
+                plugin.getLogger().info(name);
+                itemMeta.displayName( Component.text(name + " - " + (Objects.equals(on, "ON") ? "OFF" : "ON") ).decoration(TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false) );
+                clickedItem.setItemMeta(itemMeta);
+
+                event.setCurrentItem(null);
+                topInventory.setItem(event.getSlot(), clickedItem);
+            } else {
+                event.setCurrentItem(null);
+            }
             updateProfile(uuid, holder.index, topInventory);
         }
 
@@ -94,7 +114,7 @@ public class MainListener implements Listener {
     }
 
     @EventHandler
-    public void onMenuDrag(InventoryDragEvent event) {
+    public void onMenuDrag(@NonNull InventoryDragEvent event) {
         if (!(event.getView().getTopInventory().getHolder() instanceof FilterMenuHolder holder)) return;
 
         // Cancel default dragging mechanics
@@ -117,27 +137,38 @@ public class MainListener implements Listener {
     }
 
     private void addItemClone(Inventory inventory, ItemStack original) {
+        ItemStack displayOriginal = plugin.displayCopyOf(original.getType());
+
         // Check if the item is already anywhere in the filter menu to prevent duplicates
         for (ItemStack item : inventory.getContents()) {
-            if (item != null && item.isSimilar(original)) return;
+            if (item != null && item.isSimilar(displayOriginal)) return;
         }
 
         int firstEmpty = inventory.firstEmpty();
         if (firstEmpty != -1) {
-            ItemStack clone = original.clone();
-            clone.setAmount(1); // Force quantity to exactly 1
-            inventory.setItem(firstEmpty, clone);
+            displayOriginal.setAmount(1); // Force quantity to exactly 1
+            inventory.setItem(firstEmpty, displayOriginal);
         }
     }
 
     private void updateProfile(UUID uuid, byte index, Inventory inventory) {
-        List<ItemStack> stackList = new ArrayList<>();
-        for (int i=0; i < 27; i++) {
+        List<Boolean> booleans = new ArrayList<>();
+        for (int i=0; i<9; i++) {
             ItemStack itemStack = inventory.getItem(i);
-            if (itemStack != null) stackList.add(itemStack);
+            booleans.add(itemStack != null && PlainTextComponentSerializer.plainText().serialize(itemStack.displayName()).contains(" ON"));
         }
 
-        plugin.getDataManager().setProfile(uuid, index, stackList);
+        List<Material> materials = new ArrayList<>();
+        for (int i=9; i<36; i++) {
+            ItemStack itemStack = inventory.getItem(i);
+            if (itemStack == null) continue;
+
+            String name = PlainTextComponentSerializer.plainText().serialize(itemStack.displayName());
+            if (!name.isEmpty()) materials.add( Material.matchMaterial( name.replace(' ', '_').toUpperCase() ) );
+        }
+
+        plugin.getDataManager().setProfileMaterials(uuid, index, materials);
+        plugin.getDataManager().setProfileBools(uuid, index, booleans);
     }
     //endregion Filter Inventory
 }

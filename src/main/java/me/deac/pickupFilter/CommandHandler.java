@@ -1,5 +1,6 @@
 package me.deac.pickupFilter;
 
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -7,6 +8,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -16,10 +18,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.StringUtil;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class CommandHandler implements CommandExecutor, TabCompleter {
     private final PickupFilter plugin;
@@ -94,17 +96,45 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
     private void handleEdit(Player player, byte index) {
         // Opens chest GUI
-        FilterMenuHolder holder = new FilterMenuHolder();
+        UUID uuid = player.getUniqueId();
 
-        List<ItemStack> stackList = index == 0 ? new ArrayList<>() : plugin.getDataManager().getProfile(player.getUniqueId(), index);
+        FilterMenuHolder holder = new FilterMenuHolder();
+        holder.index = index;
+
         Inventory inventory = Bukkit.createInventory(
-                holder, index == 0 ? 18 : 27,
+                holder, index == 0 ? 18 : 36,
                 Component.text("Profile "+( index==0 ? "Selector" : index ) )
                         .decoration(TextDecoration.BOLD, true)
         );
-        if (index == 0) {
+        List<ItemStack> stackList = new ArrayList<>();
+        if (index != 0) {
+            List<Boolean> boolList = plugin.getDataManager().getProfileBools(uuid, index);// if (boolList.size() < 9) boolList.addAll( Collections.nCopies(9, false) );
+            for (int i=0; i<9; i++) {
+                String category = PickupFilter.categoryFilters[i];
+                plugin.getLogger().info(category + " | " + boolList.get(i));
+                String[] parts = category.split("-", 2); if (parts.length < 2) parts = List.of(category, "ERR").toArray(new String[2]);
+
+                ItemStack itemStack = new ItemStack(Material.FLINT);
+
+                ItemMeta itemMeta = itemStack.getItemMeta();
+                itemMeta.displayName(Component.text(parts[1] + " - " + (boolList.get(i) ? "ON" : "OFF") ).decoration(TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false));
+                itemMeta.lore(List.of(Component.text("If enabled, picks up " + parts[1] + (i==6 ? " items" : "") ).decoration(TextDecoration.ITALIC, false) ));
+                itemStack.setItemMeta(itemMeta);
+
+                itemStack.setData(DataComponentTypes.ITEM_MODEL, NamespacedKey.minecraft(parts[0]));
+
+                stackList.add(itemStack);
+            }
+
+            //List<ItemStack> displayableList = new ArrayList<>();
+            for (Material material : plugin.getDataManager().getProfileMaterials(uuid, index)) {
+                stackList.add( plugin.displayCopyOf(material) );
+            }
+            //stackList.addAll(plugin.getDataManager().getProfileItems(uuid, index));
+        }
+        else {
             // Do custom main GUI
-            byte selected = plugin.getDataManager().getIndex(player.getUniqueId());
+            byte selected = plugin.getDataManager().getIndex(uuid);
             plugin.getLogger().info("Selected: " + selected);
             for (byte i=1; i < 10; i++) {
                 stackList.add(i==selected ? plugin.greenPane : plugin.redPane);
@@ -137,7 +167,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String alias, String[] args) {
+    public List<String> onTabComplete(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String alias, String @NotNull [] args) {
         List<String> completions = new ArrayList<>();
         List<String> profiles = new ArrayList<>(List.of("off", "1", "2", "3", "4", "5", "6", "7", "8", "9"));
 
